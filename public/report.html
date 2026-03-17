@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicOne | Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root { --navy: #0f172a; --bg: #f8fafc; }
+        body { background: white; font-family: 'Inter', sans-serif; }
+        .left-panel { background: var(--bg); min-height: 40vh; padding: 3rem; }
+        .right-panel { padding: 3rem; }
+        .cat-btn-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        .cat-radio { display: none; }
+        .cat-label { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .cat-radio:checked + .cat-label { background: var(--navy); color: white; border-color: var(--navy); }
+        .btn-submit { background: var(--navy); color: white; width: 100%; padding: 15px; border-radius: 8px; border: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-0"><div class="row g-0">
+        <div class="col-lg-6 left-panel d-flex flex-column justify-content-center">
+            <a href="dashboard.html" class="text-muted mb-4"><i class="bi bi-chevron-left"></i> Back</a>
+            <h1 class="display-5 fw-bold mb-4">Lodge Official <span class="text-success">Report</span>.</h1>
+            <p class="text-muted lead">Evidence-based reporting for faster municipal resolution.</p>
+        </div>
+        <div class="col-lg-6 right-panel">
+            <form id="reportForm">
+                <label class="small fw-bold text-muted text-uppercase mb-2">Category</label>
+                <div class="cat-btn-group mb-4">
+                    <input type="radio" name="cat" value="Water Supply" id="c1" checked class="cat-radio"><label for="c1" class="cat-label">Water Supply</label>
+                    <input type="radio" name="cat" value="Road and Infra" id="c2" class="cat-radio"><label for="c2" class="cat-label">Road & Infra</label>
+                    <input type="radio" name="cat" value="Sanitation" id="c3" class="cat-radio"><label for="c3" class="cat-label">Sanitation</label>
+                    <input type="radio" name="cat" value="Drainage" id="c4" class="cat-radio"><label for="c4" class="cat-label">Drainage</label>
+                    <input type="radio" name="cat" value="Public Safety" id="c5" class="cat-radio"><label for="c5" class="cat-label">Public Safety</label>
+                </div>
+                <label class="small fw-bold text-muted text-uppercase mb-2">Description</label>
+                <textarea id="desc" class="form-control mb-4 border-0 bg-light p-3" rows="5" placeholder="Specify location and severity..." required></textarea>
+                <label class="small fw-bold text-muted text-uppercase mb-2">Evidence Image</label>
+                <input type="file" id="imgFile" class="form-control mb-5" accept="image/*">
+                <button type="submit" class="btn-submit" id="subBtn">Submit Official Report</button>
+            </form>
+        </div>
+    </div></div>
+
+    <div class="modal fade" id="successModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4 text-center" style="border-radius:20px;">
+        <i class="bi bi-check-circle-fill text-success display-1 mb-3"></i><h4 class="fw-bold">Reported</h4>
+        <p class="text-muted">Case ID: <span id="caseId">#000</span></p>
+        <button class="btn btn-dark w-100 py-3" onclick="window.location.href='dashboard.html'">Back to Portal</button>
+    </div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const sModal = new bootstrap.Modal(document.getElementById('successModal'));
+        document.getElementById('reportForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('subBtn');
+            const uid = localStorage.getItem('userId');
+            if(!uid) { alert("Login required"); return; }
+            
+            btn.innerHTML = "Submitting..."; btn.disabled = true;
+            const fd = new FormData();
+            fd.append('category', document.querySelector('input[name="cat"]:checked').value);
+            fd.append('description', document.getElementById('desc').value);
+            fd.append('userId', uid);
+            const file = document.getElementById('imgFile').files[0];
+            if(file) fd.append('image', file);
+
+            try {
+                const res = await fetch('/api/report', { method: 'POST', body: fd });
+                const data = await res.json();
+                if(res.ok) { document.getElementById('caseId').innerText = `#${data.id}`; sModal.show(); }
+            } catch (err) { alert("Server error"); }
+            btn.innerHTML = "Submit Official Report"; btn.disabled = false;
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicOne | Map View</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    body { background-color: #f1f5f9; padding-bottom: 90px; }
+    .map-placeholder {
+      height: 70vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #e2e8f0;
+      border-radius: 24px;
+      margin: 20px;
+      border: 2px dashed #94a3b8;
+    }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #e2e8f0; }
+    .nav-btn { color: #94a3b8; text-decoration: none; text-align: center; font-size: 0.7rem; font-weight: 600; }
+    .nav-btn.active { color: #2563eb; }
+    .nav-btn i { font-size: 1.4rem; display: block; }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h4 class="fw-bold">Issue Hotspots</h4>
+    <div class="map-placeholder">
+      <i class="bi bi-geo-alt-fill fs-1 text-secondary mb-2"></i>
+      <p class="text-secondary fw-bold">Map Integration Coming Soon</p>
+      <small class="text-muted text-center px-4">Member 1 is working on the Geolocation and API integration.</small>
+    </div>
+  </div>
+
+  <footer class="bottom-nav">
+    <a href="dashboard.html" class="nav-btn"><i class="bi bi-house-door-fill"></i>Home</a>
+    <a href="map.html" class="nav-btn active"><i class="bi bi-geo-alt-fill"></i>Map</a>
+    <a href="#" class="nav-btn"><i class="bi bi-clock-history"></i>History</a>
+    <a href="#" class="nav-btn"><i class="bi bi-gear-fill"></i>Settings</a>
+  </footer>
+</body>
+</html>

@@ -2,63 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CivicOne | Citizen Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicOne | Citizen Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold">Citizen Dashboard</h1>
-            <a href="index.html" class="btn btn-outline-secondary">Back to Home</a>
-        </div>
+    <style>
+        :root { --navy: #0f172a; --green: #10b981; --slate: #f8fafc; }
+        body { background-color: var(--slate); font-family: 'Inter', sans-serif; padding-bottom: 80px; }
+        
+        .hero { background: var(--navy); color: white; padding: 2.5rem 1.5rem; border-radius: 0 0 30px 30px; margin-bottom: 2rem; }
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1/3fr); gap: 10px; margin-top: 1.5rem; }
+        .stat-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; text-align: center; }
+        
+        .section-label { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 0 1rem 1rem; }
+        .cat-card { background: white; border: 1px solid #e2e8f0; padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
+        .cat-card:hover { border-color: var(--navy); transform: scale(1.02); }
+        .icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; background: var(--slate); font-size: 1.2rem; }
 
-        <div class="card shadow-sm p-4">
-            <h5 class="mb-3">Report a New Issue</h5>
-            <form id="reportForm">
-                <div class="mb-3">
-                    <label class="form-label">Category</label>
-                    <select id="reportCategory" class="form-select" required>
-                        <option value="Water Supply">Water Supply</option>
-                        <option value="Roads & Infrastructure">Roads & Infrastructure</option>
-                        <option value="Electricity">Electricity</option>
-                        <option value="Waste Management">Waste Management</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea id="reportDesc" class="form-control" rows="3" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Upload Photo Evidence</label>
-                    <input type="file" id="reportImage" class="form-control" accept="image/*">
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Submit Report</button>
-            </form>
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e2e8f0; z-index: 1000; }
+        .nav-item { color: #94a3b8; text-decoration: none; font-size: 0.7rem; text-align: center; font-weight: 600; }
+        .nav-item.active { color: var(--navy); }
+        .nav-item i { display: block; font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+
+    <div class="hero shadow-sm">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="fw-bold">CIVICONE.</span>
+                <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="localStorage.clear(); window.location.href='login.html'">Logout</button>
+            </div>
+            <h1 class="fw-bold display-6">Clean City,<br><span class="text-success">Better Living.</span></h1>
+            
+            <div class="row g-2 mt-4">
+                <div class="col-4"><div class="stat-card"><h3 id="statTotal" class="fw-bold mb-0">0</h3><small class="opacity-50">Total</small></div></div>
+                <div class="col-4"><div class="stat-card"><h3 id="statPending" class="fw-bold mb-0 text-warning">0</h3><small class="opacity-50">Pending</small></div></div>
+                <div class="col-4"><div class="stat-card"><h3 id="statResolved" class="fw-bold mb-0 text-success">0</h3><small class="opacity-50">Fixed</small></div></div>
+            </div>
         </div>
     </div>
 
+    <div class="container">
+        <p class="section-label">Report Infrastructure Issue</p>
+        
+        <div class="cat-card" onclick="location.href='report.html?cat=Water Supply'">
+            <div class="icon-box text-primary"><i class="bi bi-droplet"></i></div>
+            <div class="flex-grow-1"><div class="fw-bold">Water Supply</div><small class="text-muted">Leaks, shortage, or quality</small></div>
+            <i class="bi bi-chevron-right text-muted"></i>
+        </div>
+
+        <div class="cat-card" onclick="location.href='report.html?cat=Road and Infra'">
+            <div class="icon-box text-danger"><i class="bi bi-cone-striped"></i></div>
+            <div class="flex-grow-1"><div class="fw-bold">Road and Infra</div><small class="text-muted">Potholes, streetlights, or cracks</small></div>
+            <i class="bi bi-chevron-right text-muted"></i>
+        </div>
+
+        <div class="cat-card" onclick="location.href='report.html?cat=Sanitation'">
+            <div class="icon-box text-success"><i class="bi bi-trash"></i></div>
+            <div class="flex-grow-1"><div class="fw-bold">Sanitation</div><small class="text-muted">Garbage removal, waste overflow</small></div>
+            <i class="bi bi-chevron-right text-muted"></i>
+        </div>
+
+        <div class="cat-card" onclick="location.href='report.html?cat=Drainage'">
+            <div class="icon-box text-warning"><i class="bi bi-water"></i></div>
+            <div class="flex-grow-1"><div class="fw-bold">Drainage</div><small class="text-muted">Blocked pipes or sewage leaks</small></div>
+            <i class="bi bi-chevron-right text-muted"></i>
+        </div>
+
+        <div class="cat-card" onclick="location.href='report.html?cat=Public Safety'">
+            <div class="icon-box text-dark"><i class="bi bi-shield-lock"></i></div>
+            <div class="flex-grow-1"><div class="fw-bold">Public Safety</div><small class="text-muted">Public nuisances or safety threats</small></div>
+            <i class="bi bi-chevron-right text-muted"></i>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="nav-item active"><i class="bi bi-grid-fill"></i>Home</a>
+        <a href="map.html" class="nav-item"><i class="bi bi-geo-alt"></i>Map</a>
+        <a href="report.html" class="nav-item"><i class="bi bi-plus-circle-fill" style="font-size: 1.8rem; color: var(--navy);"></i></a>
+        <a href="history.html" class="nav-item"><i class="bi bi-clock-history"></i>History</a>
+    </nav>
+
     <script>
-        document.getElementById('reportForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData();
-            formData.append('category', document.getElementById('reportCategory').value);
-            formData.append('description', document.getElementById('reportDesc').value);
-            
-            const imageFile = document.getElementById('reportImage').files[0];
-            if(imageFile) formData.append('image', imageFile);
-
-            const res = await fetch('/api/report', {
-                method: 'POST',
-                body: formData 
-            });
-
-            if(res.ok) {
-                alert('Thank you! Your report has been submitted.');
-                location.reload();
-            }
-        };
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                document.getElementById('statTotal').innerText = data.total;
+                document.getElementById('statPending').innerText = data.pending;
+                document.getElementById('statResolved').innerText = data.resolved;
+            } catch (err) { console.error("Stat sync error"); }
+        }
+        fetchStats();
     </script>
 </body>
 </html>

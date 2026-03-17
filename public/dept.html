@@ -1,135 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CivicOne | Department Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  <style>
-    .task-card {
-      background: white;
-      border-radius: 15px;
-      border-top: 5px solid #2563eb;
-      transition: transform 0.2s;
-    }
-    .task-card:hover { transform: translateY(-5px); }
-    .task-img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      cursor: pointer;
-      border: 1px solid #ddd;
-    }
-    .dept-header { background: #2563eb; color: white; padding: 30px 0; }
-    .status-badge { font-size: 0.8rem; padding: 5px 12px; border-radius: 20px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicOne | Secure Access Gateway</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --navy: #0f172a; --accent: #3b82f6; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; }
+        .login-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; width: 100%; max-width: 400px; margin: auto; }
+        .login-header { background: var(--navy); color: white; padding: 30px; text-align: center; }
+        .btn-login { background: var(--navy); color: white; border: none; width: 100%; padding: 12px; font-weight: 600; border-radius: 6px; }
+    </style>
 </head>
-<body class="bg-light">
-
-  <div class="dept-header shadow-sm mb-4">
-    <div class="container d-flex justify-content-between align-items-center">
-      <div>
-        <h1 id="dept-title" class="fw-bold mb-0">Department Dashboard</h1>
-        <p class="mb-0 opacity-75">Managed by CivicOne Team</p>
-      </div>
-      <div class="dropdown">
-        <button class="btn btn-light dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-building"></i> Switch Dept
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow">
-          <li><button class="dropdown-item" onclick="changeDept('Water Supply')">Water Supply</button></li>
-          <li><button class="dropdown-item" onclick="changeDept('Roads & Infrastructure')">Roads & Infrastructure</button></li>
-          <li><button class="dropdown-item" onclick="changeDept('Electricity')">Electricity</button></li>
-          <li><button class="dropdown-item" onclick="changeDept('Waste Management')">Waste Management</button></li>
-        </ul>
-      </div>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <h4 class="fw-bold mb-0">CIVICONE</h4>
+            <p class="small opacity-50 mb-0">Official Access Gateway</p>
+        </div>
+        <div class="p-4">
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="name@civicone.gov" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted text-uppercase">Security Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-login mb-3">Authorize Access</button>
+                <div class="text-center small">
+                    <a href="#" class="text-decoration-none text-muted">Register Citizen Account</a>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <div class="container">
-    <div id="stats-row" class="row mb-4">
-      </div>
-   
-    <div class="row g-4" id="task-container">
-      </div>
-  </div>
+    <script>
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
 
-  <script>
-    // Initialize department from local storage or default
-    let selectedDept = localStorage.getItem('civicDept') || 'Water Supply';
-
-    async function loadTasks() {
-      document.getElementById('dept-title').innerText = selectedDept;
-     
-      try {
-        const res = await fetch(`/api/dept/${encodeURIComponent(selectedDept)}`);
-        const tasks = await res.json();
-        const container = document.getElementById('task-container');
-        container.innerHTML = '';
-
-        if (tasks.length === 0) {
-          container.innerHTML = `<div class="col-12 text-center py-5"><p class="text-muted">No pending tasks for ${selectedDept}.</p></div>`;
-          return;
-        }
-
-        tasks.forEach(task => {
-          const card = document.createElement('div');
-          card.className = 'col-md-6 col-lg-4';
-         
-          // Generate Image HTML: Points to the uploads folder served by Express
-          const imgHtml = task.image_path
-            ? `<img src="${task.image_path}" class="task-img" onclick="window.open('${task.image_path}')" title="Click to view full image">`
-            : `<div class="bg-secondary bg-opacity-10 text-center py-5 mb-3 rounded text-muted"><i class="bi bi-image shadow-sm d-block fs-2"></i>No Photo Evidence</div>`;
-
-          card.innerHTML = `
-            <div class="task-card p-4 shadow-sm h-100">
-              ${imgHtml}
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <span class="badge bg-light text-dark border">#ID-${task.id}</span>
-                <span class="status-badge ${task.status === 'Resolved' ? 'bg-success text-white' : 'bg-warning text-dark'}">
-                  ${task.status}
-                </span>
-              </div>
-              <h5 class="fw-bold mt-2">${task.category}</h5>
-              <p class="text-secondary small mb-4" style="min-height: 40px;">${task.description}</p>
-              <div class="d-grid mt-auto">
-                ${task.status !== 'Resolved' ?
-                  `<button class="btn btn-primary btn-sm" onclick="markResolved(${task.id})"><i class="bi bi-check-circle"></i> Mark Resolved</button>` :
-                  `<button class="btn btn-outline-success btn-sm disabled"><i class="bi bi-check-all"></i> Completed</button>`}
-              </div>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      } catch (err) {
-        console.error("Failed to load tasks:", err);
-      }
-    }
-
-    async function markResolved(id) {
-      if (!confirm("Are you sure this issue is fixed?")) return;
-     
-      await fetch('/api/dept/status', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: 'Resolved' })
-      });
-      loadTasks();
-    }
-
-    function changeDept(name) {
-      selectedDept = name;
-      localStorage.setItem('civicDept', name);
-      loadTasks();
-    }
-
-    // Load initial data
-    loadTasks();
-  </script>
+            if(data.role === 'dept') {
+                localStorage.setItem('activeDept', data.dept);
+            }
+            window.location.href = data.redirect;
+        };
+    </script>
 </body>
 </html>
