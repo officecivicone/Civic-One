@@ -26,35 +26,15 @@
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
-        .login-header { 
-            background: var(--navy); 
-            color: white; 
-            padding: 40px 30px; 
-            text-align: center; 
-        }
+        .login-header { background: var(--navy); color: white; padding: 40px 30px; text-align: center; }
         .login-body { padding: 30px; }
         .btn-google { 
-            background: white; 
-            color: #1f2937; 
-            border: 1px solid #d1d5db; 
-            width: 100%; 
-            padding: 12px; 
-            font-weight: 600; 
-            border-radius: 8px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: all 0.2s;
+            background: white; color: #1f2937; border: 1px solid #d1d5db; 
+            width: 100%; padding: 12px; font-weight: 600; border-radius: 8px; 
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
         }
         .btn-google:hover { background: #f9fafb; border-color: #9ca3af; }
-        .divider { 
-            display: flex; 
-            align-items: center; 
-            text-align: center; 
-            color: #94a3b8; 
-            font-size: 0.8rem; 
-            margin: 20px 0; 
-        }
+        .divider { display: flex; align-items: center; text-align: center; color: #94a3b8; font-size: 0.8rem; margin: 20px 0; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
         .divider:not(:empty)::before { margin-right: .5em; }
         .divider:not(:empty)::after { margin-left: .5em; }
@@ -89,10 +69,6 @@
                     Authorize Access
                 </button>
             </form>
-            
-            <div class="mt-4 text-center">
-                <a href="signup.html" class="small text-muted text-decoration-none">New Citizen? <span class="text-primary fw-bold">Enroll Here</span></a>
-            </div>
         </div>
     </div>
 
@@ -100,53 +76,43 @@
 
     <script>
         // --- 1. INITIALIZE SUPABASE ---
-        // Replace these with your actual keys from Supabase Settings > API
+        // Replace with your actual project details
         const SUPABASE_URL = 'https://zwrqhmqcxkxgslknvgcw.supabase.co';
-        const SUPABASE_ANON_KEY = 'YOUR_ACTUAL_ANON_KEY_HERE';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // --- 2. GOOGLE LOGIN LOGIC ---
         async function signInWithGoogle() {
-            const { data, error } = await _supabase.auth.signInWithOAuth({
+            const { error } = await _supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    // Redirects to your local dashboard after Google approval
-                    redirectTo: 'http://localhost:3002/dashboard.html'
+                    // CRITICAL: Point this to your Render URL for testing live
+                    redirectTo: 'https://civic-one-qwiq.onrender.com/dashboard.html'
                 }
             });
             
-            if (error) {
-                console.error("Auth Error:", error.message);
-                alert("Authentication failed: " + error.message);
-            }
+            if (error) alert("Auth Error: " + error.message);
         }
 
-        // --- 3. TRADITIONAL LOGIN (Admin/Dept) ---
+        // --- 3. TRADITIONAL LOGIN ---
         document.getElementById('traditionalLogin').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await res.json();
-                
-                if (res.ok) {
-                    // Store session data locally
-                    localStorage.setItem('userId', data.userId);
-                    localStorage.setItem('userRole', data.role);
-                    localStorage.setItem('activeDept', data.dept || '');
-                    window.location.href = data.redirect;
-                } else {
-                    alert("Invalid credentials for official access.");
-                }
-            } catch (err) {
-                alert("Connection error. Is the server running?");
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('userRole', data.role);
+                window.location.href = data.redirect;
+            } else {
+                alert("Invalid credentials.");
             }
         };
     </script>
