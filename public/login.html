@@ -11,19 +11,12 @@
         body { 
             background: var(--slate); 
             font-family: 'Inter', sans-serif; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0;
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0;
         }
         .login-card { 
-            background: white; 
-            border-radius: 16px; 
-            border: 1px solid #e2e8f0; 
-            width: 100%; 
-            max-width: 400px; 
-            overflow: hidden;
+            background: white; border-radius: 16px; border: 1px solid #e2e8f0; 
+            width: 100%; max-width: 400px; overflow: hidden;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
         .login-header { background: var(--navy); color: white; padding: 40px 30px; text-align: center; }
@@ -31,7 +24,7 @@
         .btn-google { 
             background: white; color: #1f2937; border: 1px solid #d1d5db; 
             width: 100%; padding: 12px; font-weight: 600; border-radius: 8px; 
-            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
         .btn-google:hover { background: #f9fafb; border-color: #9ca3af; }
         .divider { display: flex; align-items: center; text-align: center; color: #94a3b8; font-size: 0.8rem; margin: 20px 0; }
@@ -59,7 +52,7 @@
             <form id="traditionalLogin">
                 <div class="mb-3">
                     <label class="small fw-bold text-muted text-uppercase">Email Address</label>
-                    <input type="email" id="email" class="form-control" placeholder="name@civicone.gov" required>
+                    <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
                 </div>
                 <div class="mb-4">
                     <label class="small fw-bold text-muted text-uppercase">Password</label>
@@ -69,50 +62,51 @@
                     Authorize Access
                 </button>
             </form>
+            
+            <div class="mt-4 text-center">
+                <a href="signup.html" class="small text-muted text-decoration-none">New Citizen? <span class="text-primary fw-bold">Enroll Here</span></a>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // --- 1. INITIALIZE SUPABASE ---
-        // Replace with your actual project details
+        // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://zwrqhmqcxkxgslknvgcw.supabase.co';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; 
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- 2. GOOGLE LOGIN LOGIC ---
+        // --- GOOGLE LOGIN ---
         async function signInWithGoogle() {
             const { error } = await _supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    // CRITICAL: Point this to your Render URL for testing live
+                    // This must match your Site URL in Supabase Dashboard
                     redirectTo: 'https://civic-one-qwiq.onrender.com/dashboard.html'
                 }
             });
-            
-            if (error) alert("Auth Error: " + error.message);
+            if (error) alert("Google Login Error: " + error.message);
         }
 
-        // --- 3. TRADITIONAL LOGIN ---
+        // --- EMAIL/PASSWORD LOGIN ---
         document.getElementById('traditionalLogin').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+            // Use Supabase built-in auth instead of your local /api/login
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
             });
-            
-            const data = await res.json();
-            if (res.ok) {
-                localStorage.setItem('userId', data.userId);
-                localStorage.setItem('userRole', data.role);
-                window.location.href = data.redirect;
+
+            if (error) {
+                alert("Login Failed: " + error.message);
             } else {
-                alert("Invalid credentials.");
+                // Store session info and redirect
+                localStorage.setItem('userId', data.user.id);
+                window.location.href = 'dashboard.html';
             }
         };
     </script>

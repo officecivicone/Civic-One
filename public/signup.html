@@ -1,40 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>CivicOne | Enroll</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicOne | Enroll</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #f8fafc; font-family: 'Inter', sans-serif; display: flex; align-items: center; height: 100vh; }
-        .card { border-radius: 12px; border: 1px solid #e2e8f0; max-width: 400px; width: 100%; margin: auto; }
-        .btn-dark { background: #0f172a; border: none; padding: 12px; font-weight: bold; }
+        :root { --navy: #0f172a; --slate: #f8fafc; }
+        body { background: var(--slate); font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .signup-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 400px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .btn-dark { background: var(--navy); border: none; padding: 12px; font-weight: 600; }
     </style>
 </head>
 <body>
-    <div class="card shadow-sm p-4">
-        <h4 class="fw-bold mb-1">Citizen Enrollment</h4>
-        <p class="small text-muted mb-4">Create your official reporting profile.</p>
-        <form id="signForm">
-            <input type="text" id="name" class="form-control mb-3" placeholder="Full Name" required>
-            <input type="email" id="email" class="form-control mb-3" placeholder="Email Address" required>
-            <input type="password" id="pass" class="form-control mb-4" placeholder="Security Password" required>
-            <button type="submit" class="btn btn-dark w-100">Complete Enrollment</button>
-            <div class="text-center mt-3"><a href="login.html" class="small text-muted text-decoration-none">Back to Login</a></div>
+
+    <div class="signup-card">
+        <h3 class="fw-bold text-center mb-1">Citizen Enrollment</h3>
+        <p class="small text-muted text-center mb-4">Create your official reporting profile.</p>
+        
+        <form id="signupForm">
+            <div class="mb-3">
+                <label class="small fw-bold text-muted text-uppercase">Full Name</label>
+                <input type="text" id="fullName" class="form-control" placeholder="John Doe" required>
+            </div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted text-uppercase">Email Address</label>
+                <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+            </div>
+            <div class="mb-4">
+                <label class="small fw-bold text-muted text-uppercase">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-dark w-100 mb-3">Complete Enrollment</button>
+            <div class="text-center">
+                <a href="login.html" class="small text-decoration-none text-muted">Back to Login</a>
+            </div>
         </form>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        document.getElementById('signForm').onsubmit = async (e) => {
+        // 1. Initialize Supabase
+        const SUPABASE_URL = 'https://zwrqhmqcxkxgslknvgcw.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 2. Handle Signup
+        document.getElementById('signupForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch('/api/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: document.getElementById('name').value,
-                    email: document.getElementById('email').value,
-                    password: document.getElementById('pass').value
-                })
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullName').value;
+
+            // Supabase Auth Signup
+            const { data, error } = await _supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        full_name: fullName // This saves the name into the 'metadata' field
+                    },
+                    // After clicking the email link, they go here:
+                    emailRedirectTo: 'https://civic-one-qwiq.onrender.com/login.html'
+                }
             });
-            if(res.ok) { alert("Success! Please log in."); window.location.href="login.html"; }
-            else { alert("Email already exists."); }
+
+            if (error) {
+                alert("Error: " + error.message);
+            } else {
+                alert("Check your email for the confirmation link!");
+                window.location.href = 'login.html';
+            }
         };
     </script>
 </body>
