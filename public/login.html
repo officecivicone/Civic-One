@@ -1,43 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CivicOne | Secure Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicOne | Secure Access</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        :root { --navy: #0f172a; }
-        body { background: #f8fafc; font-family: 'Inter', sans-serif; display: flex; align-items: center; height: 100vh; }
-        .login-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; max-width: 400px; margin: auto; }
-        .login-header { background: var(--navy); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
-        .btn-login { background: var(--navy); color: white; border: none; width: 100%; padding: 12px; font-weight: 600; border-radius: 6px; }
+        :root { --navy: #0f172a; --slate: #f8fafc; }
+        body { 
+            background: var(--slate); 
+            font-family: 'Inter', sans-serif; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0;
+        }
+        .login-card { 
+            background: white; 
+            border-radius: 16px; 
+            border: 1px solid #e2e8f0; 
+            width: 100%; 
+            max-width: 400px; 
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .login-header { 
+            background: var(--navy); 
+            color: white; 
+            padding: 40px 30px; 
+            text-align: center; 
+        }
+        .login-body { padding: 30px; }
+        .btn-google { 
+            background: white; 
+            color: #1f2937; 
+            border: 1px solid #d1d5db; 
+            width: 100%; 
+            padding: 12px; 
+            font-weight: 600; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-google:hover { background: #f9fafb; border-color: #9ca3af; }
+        .divider { 
+            display: flex; 
+            align-items: center; 
+            text-align: center; 
+            color: #94a3b8; 
+            font-size: 0.8rem; 
+            margin: 20px 0; 
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
     </style>
 </head>
 <body>
+
     <div class="login-card">
-        <div class="login-header"><h4 class="fw-bold mb-0">CIVICONE</h4><p class="small opacity-50 mb-0">Authorized Gateway</p></div>
-        <div class="p-4">
-            <form id="loginForm">
-                <div class="mb-3"><label class="small fw-bold text-muted text-uppercase">Email</label><input type="email" id="email" class="form-control" required></div>
-                <div class="mb-4"><label class="small fw-bold text-muted text-uppercase">Password</label><input type="password" id="password" class="form-control" required></div>
-                <button type="submit" class="btn-login mb-3">Authorize</button>
-                <div class="text-center"><a href="signup.html" class="small text-muted text-decoration-none">New Citizen? Register Here</a></div>
+        <div class="login-header">
+            <h3 class="fw-bold mb-1">CIVICONE</h3>
+            <p class="small opacity-50 mb-0">Municipal Reporting Gateway</p>
+        </div>
+        
+        <div class="login-body">
+            <button onclick="signInWithGoogle()" class="btn-google mb-3">
+                <img src="https://www.google.com/favicon.ico" width="18" class="me-3">
+                Continue with Google
+            </button>
+
+            <div class="divider">OR USE OFFICIAL ACCOUNT</div>
+
+            <form id="traditionalLogin">
+                <div class="mb-3">
+                    <label class="small fw-bold text-muted text-uppercase">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="name@civicone.gov" required>
+                </div>
+                <div class="mb-4">
+                    <label class="small fw-bold text-muted text-uppercase">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-dark w-100 py-2 fw-bold" style="background: var(--navy);">
+                    Authorize Access
+                </button>
             </form>
+            
+            <div class="mt-4 text-center">
+                <a href="signup.html" class="small text-muted text-decoration-none">New Citizen? <span class="text-primary fw-bold">Enroll Here</span></a>
+            </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        document.getElementById('loginForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+        // --- 1. INITIALIZE SUPABASE ---
+        // Replace these with your actual keys from Supabase Settings > API
+        const SUPABASE_URL = 'https://zwrqhmqcxkxgslknvgcw.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR_ACTUAL_ANON_KEY_HERE';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- 2. GOOGLE LOGIN LOGIC ---
+        async function signInWithGoogle() {
+            const { data, error } = await _supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    // Redirects to your local dashboard after Google approval
+                    redirectTo: 'http://localhost:3002/dashboard.html'
+                }
             });
-            const data = await res.json();
-            if(res.ok) {
-                localStorage.setItem('userId', data.userId);
-                localStorage.setItem('activeDept', data.dept);
-                window.location.href = data.redirect;
-            } else { alert("Access Denied"); }
+            
+            if (error) {
+                console.error("Auth Error:", error.message);
+                alert("Authentication failed: " + error.message);
+            }
+        }
+
+        // --- 3. TRADITIONAL LOGIN (Admin/Dept) ---
+        document.getElementById('traditionalLogin').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    // Store session data locally
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('userRole', data.role);
+                    localStorage.setItem('activeDept', data.dept || '');
+                    window.location.href = data.redirect;
+                } else {
+                    alert("Invalid credentials for official access.");
+                }
+            } catch (err) {
+                alert("Connection error. Is the server running?");
+            }
         };
     </script>
 </body>

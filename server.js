@@ -170,5 +170,5 @@ app.put('/api/admin/assign', async (req, res) => {
 
 // --- 8. START SERVER ---
 app.listen(PORT, () => {
-    console.log(`CivicOne Protocol active on http://localhost:${PORT}`);
+    console.log(`🚀 CivicOne Protocol active on http://localhost:${PORT}`);
 });
